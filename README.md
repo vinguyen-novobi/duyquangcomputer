@@ -1,1 +1,1 @@
-# duyquangcomputer
+# Personal project
