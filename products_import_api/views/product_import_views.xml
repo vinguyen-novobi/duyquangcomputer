@@ -28,6 +28,6 @@
 
 
     <!--############################## MENUS ##############################-->
-    <menuitem name="San Pham" id="products_import_base_menu" web_icon="duyquanglogo,static/description/duyquanglogo.jpg"/>
+    <menuitem name="San Pham" id="products_import_base_menu" web_icon="products_import_api,static/description/logo.png"/>
     <menuitem name="Product" id="products_import_menu" parent="products_import_base_menu" sequence = "1" groups = "base.group_user" action="website_sale.product_template_action_website" />
 </odoo>
