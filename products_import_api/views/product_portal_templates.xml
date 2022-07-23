@@ -1,0 +1,184 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="portal_my_home_menu_product" name="Portal layout : sale product menu entries" inherit_id="portal.portal_breadcrumbs" priority="9">
+        <xpath expr="//ol[hasclass('o_portal_submenu')]" position="inside">
+            <li t-if="page_name == 'product'" t-attf-class="breadcrumb-item #{'active ' if not product else ''}">
+                <a t-if="product" t-attf-href="/my/products?{{ keep_query() }}">Products</a>
+                <t t-else="">Products</t>
+            </li>
+            <li t-if="product" class="breadcrumb-item active">
+            </li>
+        </xpath>
+    </template>
+
+    <template id="portal_my_home_product" name="Show sale products" inherit_id="portal.portal_my_home" customize_show="True" priority="9">
+        <xpath expr="//div[hasclass('o_portal_docs')]" position="inside">
+            <t t-call="portal.portal_docs_entry">
+                <t t-set="title">Product</t>
+                <t t-set="url" t-value="'/my/products'"/>
+                <t t-set="placeholder_count" t-value="'products_count'"/>
+            </t>
+        </xpath>
+    </template>
+
+    <template id="portal_my_products" name="My Products">
+        <t t-call="portal.portal_layout">
+            <t t-set="breadcrumbs_searchbar" t-value="True"/>
+
+            <!-- Custom search bar -->
+            <t t-call="products_import_api.products_searchbar"/>
+            
+            
+            <t t-call="portal.portal_searchbar">
+                <t t-set="title">Products</t>
+            </t>
+
+            <form action="/my/products/new" method="get">
+                <div>
+                    <button type="submit">Create</button>
+                </div>
+            </form>
+
+            <t t-if="not products">
+                <p>There are currently no products for your account.</p>
+            </t>
+            <t t-if="products" t-call="portal.portal_table">
+                <thead>
+                    <tr class="active">
+                        <th>
+                            <span class='d-none d-md-inline'>Product</span>
+                            <span class='d-block d-md-none'>Ref.</span>
+                        </th>
+                        <th class="text-right">Created Date</th>
+                        <th class="text-center"/>
+                        <th class="text-right">Status</th>
+                        <th class="text-right">Price</th>
+                    </tr>
+                </thead>
+                <t t-foreach="products" t-as="product">
+                    <tr>
+                        <td><t t-esc="product.name"/></td>
+                        <!-- <td class="text-right">
+                            <span t-field="product.create_date" t-options="{'widget': 'date'}"/>&amp;nbsp;
+                            <span class='d-none d-md-inline' t-field="product.approved_date" t-options="{'time_only': True}"/>
+                        </td> -->
+                        <!-- <td class="text-center">
+                            <span t-if="product.status == 'approved'"  class="badge badge-pill badge-success">
+                                <i class="fa fa-fw fa-check" role="img" aria-label="Approved" title="Approved"/>Approved
+                            </span>
+                            <span t-if="product.status == 'cancel'"  class="badge badge-pill badge-secondary">
+                                <i class="fa fa-fw fa-x" role="img" aria-label="Cancel" title="Cancel"/>Cancel
+                            </span>
+                            <span t-if="product.status == 'to_confirm'">
+                                <form action="/my/products" method="post">
+                                    <input type="hidden" name="csrf_token" t-att-value="product.csrf_token()"/>
+                                    <input type="hidden" id="product_id" t-att-value='product.id' name='product_id'/>
+                                    <button type="submit" style="padding: 0px 10px;" class="btn btn-sm btn-danger" title="To Confirm">To Confirm</button>
+                                </form>
+                            </span>
+                            <span t-if="product.status == 'confirmed'"  class="badge badge-pill badge-info">
+                                <i class="fa fa-fw fa-check" role="img" aria-label="Confirmed" title="Confirmed"/>Confirmed
+                            </span>
+                            <span t-if="product.status == 'draft'"  class="badge badge-pill badge-light">
+                                <i class="fa fa-fw fa-bars" role="img" aria-label="Draft" title="Draft"/>Draft
+                            </span>
+                        </td> -->
+                        <!-- <td class="text-right"><span t-field="product.fulfilment_status"/></td>
+                        <td class="text-right"><span t-field="product.amount_total"/></td> -->
+                    </tr>
+                </t>
+            </t>
+        </t>
+    </template>
+
+    <template id="products_searchbar" name="Product Import Search Bar">
+        <form action="/my/products" method="get">
+            <div class="input-group input-group-sm w-100">
+                <input type="text" placeholder="Search" id="searchval" t-att-value='searchval' name="searchval"/>
+                <span class="input-group-append">
+                    <button class="btn btn-secondary o_wait_lazy_js" type="submit">
+                        <span class="fa fa-search"/>
+                    </button>
+                </span>
+            </div>
+        </form>
+    </template>
+
+    <template id="portal_my_products_create" name="Sales Request Create Portal Template" inherit_id="portal.portal_sidebar" primary="True">
+        <xpath expr="//div[hasclass('o_portal_sidebar')]" position="inside">
+            <div class="row mt16 o_portal_sale_sidebar">
+
+                <t t-call="portal.portal_record_sidebar">
+                    <t t-set="classes" t-value="'col-lg-auto d-print-none'"/>
+                    <t t-set="entries">
+                        <ul class="list-group list-group-flush flex-wrap flex-row flex-lg-column">
+                            <li class="navspy list-group-item pl-0 flex-grow-1" t-ignore="true" role="complementary">
+                                <ul class="nav flex-column bs-sidenav"></ul>
+                            </li>
+                        </ul>
+                    </t>
+                </t>
+
+                <div id="product_content" class="col-12 col-lg justify-content-end">
+                    <!-- <h1 id= "header_reatailer">Hello <em id = "retailer" t-att-value="retailer_id.id" t-esc="retailer_id.name"/></h1> -->
+
+                    <div t-attf-class="card #{'pb-5' if report_type == 'html' else ''}" style ="padding: 10px;" id="portal_product_content">
+                        <div t-call="products_import_api.sale_product_portal_create_item"/>
+                    </div>
+                </div>
+            </div>>
+        </xpath>
+    </template>
+    
+    <template id="sale_product_portal_create_item" name="Products Portal Content">
+        <div id="introduction" t-attf-class="pb-2 pt-3 #{'card-header bg-white' if report_type == 'html' else ''}">
+            <h2 class="my-0">
+                New
+            </h2>
+        </div>
+
+        <div t-attf-class="#{'card-body ' if report_type == 'html' else ''}">
+            <div class ="o_place_product_body">
+                <div id="search_product" class="input-group input-group-sm w-100 o_products_choice">
+                    <div class="form-group">
+                        <label for="product_chosen" class="control-label">Products</label>
+                        <datalist id="product_chosen" name="product_chosen" t-att-value="product_chosen">
+                            <t t-foreach="products" t-as="p">
+                                <option t-esc= 'p.id' t-att-value="p.display_name" t-set="currency_id" t-value = "p.currency_id" />
+                            </t>
+                        </datalist>
+                        <input id = "selected_pd" autoComplete="on" list="product_chosen" placeholder="Search.."/> 
+                    </div>
+                    <div>
+                        <button id="submit" class="o_search_product" t-att-value='product_chosen' name="submit" type="button">Add Product</button>
+                    </div>
+                </div>
+                <div class ="o_action_confirm">
+                    <div id="confirm" align = "right" style="padding-right: 20px;">
+                        <div>
+                            <button id="submit" name="submit" type="button" class="o_confirm_product">Confirm</button>
+                        </div>
+                    </div>
+                </div>
+                <section id="details" style="page-break-inside: auto;" class="mt32">
+                    <h4 id="h_detail">Product</h4>
+                    <table class="table table-sm" id="sales_product_table">
+                        <thead class="bg-100">
+                            <tr>
+                                <th class="text-left">Products</th>
+                                <th class="text-right">Quantity</th>
+                                <th t-attf-class="text-right {{ 'd-none d-sm-table-cell' if report_type == 'html' else '' }}">Unit Price</th>
+                                <th class="text-right">Discount</th>
+                                <th class="text-right">CRV Amount</th>
+                                <th class="text-right">Sub Total</th>
+                            </tr>
+                        </thead>
+                        <tbody id="rq_tab_body" class="product_tbody">
+                        </tbody>
+                    </table>
+                </section>
+            </div>
+        </div>
+    </template>
+
+</odoo>
